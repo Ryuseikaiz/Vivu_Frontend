@@ -1,11 +1,13 @@
 import React, { useState } from 'react';
 import axios from 'axios';
+import { useAuth } from '../../contexts/AuthContext';
 import './PromoCodeInput.css';
 
 const PromoCodeInput = ({ onSuccess }) => {
   const [code, setCode] = useState('');
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState({ type: '', text: '' });
+  const { updateUser } = useAuth();
 
   const handleApplyPromoCode = async (e) => {
     e.preventDefault();
@@ -36,9 +38,14 @@ const PromoCodeInput = ({ onSuccess }) => {
       });
       setCode('');
       
-      // Notify parent component to refresh subscription data
+      // Update user in AuthContext immediately if backend returned updated user
+      if (response.data.user && updateUser) {
+        updateUser(response.data.user);
+      }
+      
+      // Also notify parent component to refresh if needed
       if (onSuccess) {
-        onSuccess(response.data.subscription);
+        onSuccess(response.data.user || response.data.subscription);
       }
 
     } catch (error) {

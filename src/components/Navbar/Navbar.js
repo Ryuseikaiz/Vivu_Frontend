@@ -36,8 +36,7 @@ const Navbar = () => {
   const navItems = [
     { key: 'home', label: 'Trang chủ', to: '/', requireAuth: false, end: true },
     { key: 'ai', label: 'AI Du lịch', to: '/ai', requireAuth: true },
-    { key: 'location', label: 'Khám phá', to: '/location', requireAuth: true },
-    { key: 'forum', label: 'Forum', to: '/forum', requireAuth: true }
+    { key: 'location', label: 'Khám phá', to: '/location', requireAuth: true }
   ];
 
   const handleNavigate = (path) => {

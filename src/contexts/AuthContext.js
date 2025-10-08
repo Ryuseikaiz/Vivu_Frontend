@@ -166,10 +166,23 @@ export const AuthProvider = ({ children }) => {
   const refreshUser = async () => {
     try {
       const response = await axios.get('/api/auth/me');
-      setUser(response.data.user);
+      const userData = response.data.user;
+      setUser(userData);
+      // Update localStorage as well so state persists across page reloads
+      localStorage.setItem('user', JSON.stringify(userData));
+      console.log('✅ User refreshed:', userData.email);
+      return { success: true, user: userData };
     } catch (error) {
       console.error('Failed to refresh user:', error);
+      return { success: false, error: error.message };
     }
+  };
+
+  // Update user data directly (useful when backend returns updated user)
+  const updateUser = (userData) => {
+    setUser(userData);
+    localStorage.setItem('user', JSON.stringify(userData));
+    console.log('✅ User updated locally:', userData.email);
   };
 
   const value = {
@@ -181,6 +194,7 @@ export const AuthProvider = ({ children }) => {
     register,
     logout,
     refreshUser,
+    updateUser,
     isAuthenticated: !!token && !!user,
     canUseTrial: user?.canUseTrial || false,
     isSubscriptionActive: user?.isSubscriptionActive || false

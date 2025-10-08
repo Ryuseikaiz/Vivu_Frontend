@@ -15,7 +15,6 @@ import BlogList from './components/Blog/BlogList';
 import CreateBlog from './components/Blog/CreateBlog';
 import BlogDetail from './components/Blog/BlogDetail';
 import HomePage from './components/HomePage/HomePage';
-import Forum from './components/Forum/Forum';
 
 const LoadingScreen = () => (
   <div className="App">
@@ -203,14 +202,6 @@ const AppShell = () => {
           element={(
             <ProtectedRoute>
               <LocationPage onSelect={(place) => setSelectedLocation(place)} />
-            </ProtectedRoute>
-          )}
-        />
-        <Route
-          path="/forum"
-          element={(
-            <ProtectedRoute>
-              <Forum />
             </ProtectedRoute>
           )}
         />
