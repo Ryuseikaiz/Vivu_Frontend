@@ -15,6 +15,7 @@ import BlogList from './components/Blog/BlogList';
 import CreateBlog from './components/Blog/CreateBlog';
 import BlogDetail from './components/Blog/BlogDetail';
 import HomePage from './components/HomePage/HomePage';
+import LoadingVideos from './components/LoadingVideos/LoadingVideos';
 
 const LoadingScreen = () => (
   <div className="App">
@@ -112,12 +113,7 @@ const AiPage = ({
               selectedLocation={selectedLocation}
               onClearSelectedLocation={clearSelectedLocation}
             />
-            {loading && (
-              <div className="loading">
-                <div className="spinner"></div>
-                <p>Đang tìm kiếm thông tin du lịch...</p>
-              </div>
-            )}
+            {loading && <LoadingVideos />}
             {travelInfo && (
               <>
                 <TravelResults travelInfo={travelInfo} />
