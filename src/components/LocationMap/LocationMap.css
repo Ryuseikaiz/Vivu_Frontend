@@ -245,6 +245,21 @@
   max-width: 420px;
 }
 
+.error-message--warning {
+  background: rgba(245, 158, 11, 0.18);
+  color: #fff3cd;
+}
+
+.error-message--info {
+  background: rgba(59, 130, 246, 0.18);
+  color: #e3f2fd;
+}
+
+.error-message--geolocation {
+  background: rgba(231, 76, 60, 0.18);
+  color: #ffeaea;
+}
+
 .location-body {
   display: grid;
   grid-template-columns: minmax(0, 1.15fr) minmax(0, 0.85fr);

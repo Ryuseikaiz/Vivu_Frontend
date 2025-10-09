@@ -121,8 +121,8 @@ const LocationMap = ({ onLocationSelect }) => {
     }
   }, []);
 
-  // Get user's current location
-  const getCurrentLocation = useCallback(() => {
+  // Get user's current location with accuracy retry
+  const getCurrentLocation = useCallback((retryCount = 0) => {
     setLoading(true);
     setError(null);
 
@@ -140,10 +140,9 @@ const LocationMap = ({ onLocationSelect }) => {
         };
 
         const accuracy = Math.round(position.coords.accuracy);
-        setLocationAccuracy(accuracy);
 
         // Log accuracy for debugging
-        console.log('📍 Vị trí hiện tại:', {
+        console.log('📍 Vị trí hiện tại (lần thử ' + (retryCount + 1) + '):', {
           lat: position.coords.latitude,
           lng: position.coords.longitude,
           accuracy: accuracy + 'm',
@@ -151,8 +150,33 @@ const LocationMap = ({ onLocationSelect }) => {
           speed: position.coords.speed
         });
 
+        // If accuracy is very poor (>500m) and we haven't retried yet, try again
+        if (accuracy > 500 && retryCount < 2) {
+          console.log('⚠️ Độ chính xác kém, đang thử lại...');
+          setError({
+            type: 'info',
+            message: `Độ chính xác hiện tại: ±${accuracy}m. Đang cải thiện độ chính xác...`
+          });
+
+          setTimeout(() => {
+            getCurrentLocation(retryCount + 1);
+          }, 2000);
+          return;
+        }
+
+        setLocationAccuracy(accuracy);
+
+        // Show warning if accuracy is still poor
+        if (accuracy > 200) {
+          setError({
+            type: 'warning',
+            message: `Độ chính xác không cao (±${accuracy}m). Kết quả có thể không chính xác. Hãy di chuyển ra ngoài trời hoặc bật GPS.`
+          });
+        }
+
         setUserLocation(location);
         fetchNearbyPlaces(location, selectedCategory);
+        setLoading(false);
       },
       (geoError) => {
         let errorMessage = 'Không thể lấy vị trí. ';
@@ -161,7 +185,7 @@ const LocationMap = ({ onLocationSelect }) => {
             errorMessage += 'Bạn cần cho phép truy cập vị trí.';
             break;
           case geoError.POSITION_UNAVAILABLE:
-            errorMessage += 'Tín hiệu định vị không ổn định.';
+            errorMessage += 'Tín hiệu định vị không ổn định. Hãy di chuyển ra ngoài trời.';
             break;
           case geoError.TIMEOUT:
             errorMessage += 'Yêu cầu định vị quá thời gian cho phép. Hãy thử lại.';
@@ -176,8 +200,8 @@ const LocationMap = ({ onLocationSelect }) => {
       },
       {
         enableHighAccuracy: true,      // Sử dụng GPS thay vì WiFi/Cell Tower
-        timeout: 15000,                 // Tăng timeout lên 15s để GPS có thời gian định vị chính xác
-        maximumAge: 0                   // Không dùng cache, luôn lấy vị trí mới nhất
+        timeout: 20000,                 // Tăng timeout lên 20s để GPS có thời gian định vị chính xác hơn
+        maximumAge: 30000               // Cho phép cache 30s để GPS có thời gian ổn định
       }
     );
   }, [fetchNearbyPlaces, selectedCategory]);
