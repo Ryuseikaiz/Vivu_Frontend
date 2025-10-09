@@ -388,6 +388,18 @@ const LocationMap = ({ onLocationSelect }) => {
             {placesToDisplay.map((place) => {
               const displayRating = formatRating(place.rating);
               const primaryType = formatPlaceType(place.types?.[0]);
+
+              // Generate a unique placeholder image based on place name
+              const getPlaceholderImage = (placeName, category) => {
+                const categoryImages = {
+                  restaurant: 'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=400&h=300&fit=crop',
+                  cafe: 'https://images.unsplash.com/photo-1445116572660-236099ec97a0?w=400&h=300&fit=crop',
+                  lodging: 'https://images.unsplash.com/photo-1566073771259-6a8506099945?w=400&h=300&fit=crop',
+                  tourist_attraction: 'https://images.unsplash.com/photo-1469854523086-cc02fe5d8800?w=400&h=300&fit=crop',
+                };
+                return categoryImages[category] || categoryImages.tourist_attraction;
+              };
+
               return (
                 <div
                   key={place.place_id || `${place.geometry.location.lat}-${place.geometry.location.lng}`}
@@ -404,13 +416,18 @@ const LocationMap = ({ onLocationSelect }) => {
                         alt={place.name}
                         loading="lazy"
                         onError={(event) => {
-                          event.currentTarget.style.display = 'none';
+                          // If photo fails to load, use placeholder
+                          event.currentTarget.src = getPlaceholderImage(place.name, place.types?.[0]);
                         }}
                       />
                     </div>
                   ) : (
-                    <div className="place-image placeholder">
-                      <span>🌐</span>
+                    <div className="place-image">
+                      <img
+                        src={getPlaceholderImage(place.name, place.types?.[0])}
+                        alt={place.name}
+                        loading="lazy"
+                      />
                     </div>
                   )}
 
