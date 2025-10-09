@@ -297,6 +297,37 @@
   background: rgba(31, 60, 136, 0.12);
 }
 
+.map-status-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  align-items: flex-end;
+}
+
+.accuracy-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 6px 12px;
+  border-radius: 999px;
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+.accuracy-badge.good {
+  background: rgba(34, 197, 94, 0.15);
+  color: #166534;
+}
+
+.accuracy-badge.medium {
+  background: rgba(234, 179, 8, 0.15);
+  color: #a16207;
+}
+
+.accuracy-badge.poor {
+  background: rgba(239, 68, 68, 0.15);
+  color: #b91c1c;
+}
+
 .map-wrapper {
   position: relative;
   border-radius: 18px;

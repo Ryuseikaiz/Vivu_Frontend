@@ -40,6 +40,7 @@ const LocationMap = ({ onLocationSelect }) => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [selectedCategory, setSelectedCategory] = useState(CATEGORY_OPTIONS[0].value);
+  const [locationAccuracy, setLocationAccuracy] = useState(null);
 
   const buildMapsUrl = useCallback((place) => {
     if (!place) {
@@ -137,6 +138,19 @@ const LocationMap = ({ onLocationSelect }) => {
           lat: position.coords.latitude,
           lng: position.coords.longitude
         };
+
+        const accuracy = Math.round(position.coords.accuracy);
+        setLocationAccuracy(accuracy);
+
+        // Log accuracy for debugging
+        console.log('📍 Vị trí hiện tại:', {
+          lat: position.coords.latitude,
+          lng: position.coords.longitude,
+          accuracy: accuracy + 'm',
+          heading: position.coords.heading,
+          speed: position.coords.speed
+        });
+
         setUserLocation(location);
         fetchNearbyPlaces(location, selectedCategory);
       },
@@ -150,20 +164,20 @@ const LocationMap = ({ onLocationSelect }) => {
             errorMessage += 'Tín hiệu định vị không ổn định.';
             break;
           case geoError.TIMEOUT:
-            errorMessage += 'Yêu cầu định vị quá thời gian cho phép.';
+            errorMessage += 'Yêu cầu định vị quá thời gian cho phép. Hãy thử lại.';
             break;
           default:
             errorMessage += 'Đã xảy ra lỗi không xác định.';
             break;
         }
-  setError({ type: 'geolocation', message: errorMessage });
+        setError({ type: 'geolocation', message: errorMessage });
         console.error('Geolocation error:', geoError);
         setLoading(false);
       },
       {
-        enableHighAccuracy: true,
-        timeout: 10000,
-        maximumAge: 300000
+        enableHighAccuracy: true,      // Sử dụng GPS thay vì WiFi/Cell Tower
+        timeout: 15000,                 // Tăng timeout lên 15s để GPS có thời gian định vị chính xác
+        maximumAge: 0                   // Không dùng cache, luôn lấy vị trí mới nhất
       }
     );
   }, [fetchNearbyPlaces, selectedCategory]);
@@ -309,7 +323,14 @@ const LocationMap = ({ onLocationSelect }) => {
               <p>Phóng to, thu nhỏ và chạm vào từng điểm để xem chi tiết nhanh.</p>
             </div>
             {userLocation && (
-              <span className="map-status">Đang hiển thị trong bán kính 2km</span>
+              <div className="map-status-group">
+                <span className="map-status">Đang hiển thị trong bán kính 2km</span>
+                {locationAccuracy && (
+                  <span className={`accuracy-badge ${locationAccuracy < 50 ? 'good' : locationAccuracy < 200 ? 'medium' : 'poor'}`}>
+                    📍 Độ chính xác: ±{locationAccuracy}m
+                  </span>
+                )}
+              </div>
             )}
           </div>
           <div className="map-wrapper">
