@@ -16,6 +16,7 @@ import CreateBlog from './components/Blog/CreateBlog';
 import BlogDetail from './components/Blog/BlogDetail';
 import HomePage from './components/HomePage/HomePage';
 import LoadingVideos from './components/LoadingVideos/LoadingVideos';
+import Toast from './components/Toast/Toast';
 
 const LoadingScreen = () => (
   <div className="App">
@@ -221,6 +222,7 @@ function App() {
   return (
     <AuthProvider>
       <Router>
+        <Toast />
         <AppShell />
       </Router>
     </AuthProvider>

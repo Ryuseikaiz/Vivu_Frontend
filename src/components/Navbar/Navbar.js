@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
+import { showToast } from '../Toast/Toast';
 import './Navbar.css';
 
 const Navbar = () => {
@@ -38,6 +39,18 @@ const Navbar = () => {
     { key: 'ai', label: 'AI Du lịch', to: '/ai', requireAuth: true },
     { key: 'location', label: 'Khám phá', to: '/location', requireAuth: true }
   ];
+
+  const handleNavClick = (e, item) => {
+    if (item.requireAuth && !isAuthenticated) {
+      e.preventDefault();
+      showToast('Vui lòng đăng nhập để sử dụng tính năng này', 'info');
+      setTimeout(() => {
+        navigate('/auth/login');
+      }, 1000);
+      return;
+    }
+    setIsMobileOpen(false);
+  };
 
   const handleNavigate = (path) => {
     if (path) {
@@ -87,19 +100,17 @@ const Navbar = () => {
         </button>
 
         <nav className={`navbar-links ${isMobileOpen ? 'open' : ''}`}>
-          {navItems
-            .filter((item) => !item.requireAuth || isAuthenticated)
-            .map((item) => (
-              <NavLink
-                key={item.key}
-                to={item.to}
-                end={item.end}
-                className={({ isActive }) => `nav-link ${isActive ? 'active' : ''}`}
-                onClick={() => handleNavigate()}
-              >
-                {item.label}
-              </NavLink>
-            ))}
+          {navItems.map((item) => (
+            <NavLink
+              key={item.key}
+              to={item.to}
+              end={item.end}
+              className={({ isActive }) => `nav-link ${isActive ? 'active' : ''}`}
+              onClick={(e) => handleNavClick(e, item)}
+            >
+              {item.label}
+            </NavLink>
+          ))}
         </nav>
 
         <div className="navbar-actions">
