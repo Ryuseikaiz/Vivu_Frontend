@@ -27,7 +27,7 @@ const AuthCallback = () => {
           localStorage.setItem('token', token);
 
           // Fetch user data
-          const response = await fetch('http://localhost:5000/api/auth/me', {
+          const response = await fetch(`${process.env.REACT_APP_API_URL}/api/auth/me`, {
             headers: {
               'Authorization': `Bearer ${token}`
             }

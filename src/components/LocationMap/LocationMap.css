@@ -552,6 +552,32 @@
   width: 100%;
 }
 
+.btn-view-reviews {
+  padding: 8px 16px;
+  border: 2px solid #8b5cf6;
+  background: white;
+  color: #8b5cf6;
+  border-radius: 10px;
+  font-weight: 600;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.btn-view-reviews:hover {
+  background: #8b5cf6;
+  color: white;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(139, 92, 246, 0.3);
+}
+
+.btn-view-reviews:active {
+  transform: translateY(0);
+}
+
 .open-maps {
   font-size: 0.85rem;
   font-weight: 600;
@@ -559,6 +585,91 @@
   display: inline-flex;
   align-items: center;
   gap: 6px;
+}
+
+/* Route Features */
+.route-info-banner {
+  background: linear-gradient(135deg, #8b5cf6 0%, #6366f1 100%);
+  color: white;
+  padding: 16px 24px;
+  border-radius: 16px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  box-shadow: 0 4px 20px rgba(139, 92, 246, 0.3);
+  animation: slideIn 0.3s ease;
+  margin: 0 0 24px 0;
+}
+
+@keyframes slideIn {
+  from {
+    transform: translateY(-20px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+.route-info-icon {
+  font-size: 2rem;
+  animation: bounce 2s ease-in-out infinite;
+}
+
+@keyframes bounce {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-5px);
+  }
+}
+
+.route-info-details {
+  flex: 1;
+  font-size: 1.1rem;
+}
+
+.route-info-close {
+  background: rgba(255, 255, 255, 0.2);
+  border: none;
+  color: white;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  cursor: pointer;
+  font-size: 1.2rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+}
+
+.route-info-close:hover {
+  background: rgba(255, 255, 255, 0.3);
+  transform: scale(1.1);
+}
+
+.place-card.route-active {
+  border: 2px solid #8b5cf6;
+  background: linear-gradient(135deg, rgba(139, 92, 246, 0.05) 0%, rgba(99, 102, 241, 0.05) 100%);
+  box-shadow: 0 4px 20px rgba(139, 92, 246, 0.2);
+  transform: translateY(-2px);
+}
+
+.place-card {
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.place-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+}
+
+.place-card.route-active:hover {
+  box-shadow: 0 8px 28px rgba(139, 92, 246, 0.3);
 }
 
 .select-place-btn {

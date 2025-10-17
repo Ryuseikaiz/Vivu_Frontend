@@ -1,9 +1,12 @@
-import React, { useState, useEffect, useCallback, useMemo } from 'react';
-import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
+import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
+import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet';
 import L from 'leaflet';
+import 'leaflet-routing-machine';
+import 'leaflet-routing-machine/dist/leaflet-routing-machine.css';
 import axios from 'axios';
 import 'leaflet/dist/leaflet.css';
 import './LocationMap.css';
+import ReviewModal from './ReviewModal';
 
 // Fix for default markers in react-leaflet
 delete L.Icon.Default.prototype._getIconUrl;
@@ -12,6 +15,68 @@ L.Icon.Default.mergeOptions({
   iconUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon.png',
   shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
 });
+
+// Routing Machine Component
+const RoutingMachine = ({ start, end, onRouteFound }) => {
+  const map = useMap();
+  const routingControlRef = useRef(null);
+
+  useEffect(() => {
+    if (!map || !start || !end) return;
+
+    // Remove existing routing control
+    if (routingControlRef.current) {
+      map.removeControl(routingControlRef.current);
+      routingControlRef.current = null;
+    }
+
+    // Create new routing control
+    const routingControl = L.Routing.control({
+      waypoints: [
+        L.latLng(start.lat, start.lng),
+        L.latLng(end.lat, end.lng)
+      ],
+      routeWhileDragging: false,
+      addWaypoints: false,
+      draggableWaypoints: false,
+      fitSelectedRoutes: true,
+      showAlternatives: false,
+      lineOptions: {
+        styles: [{ color: '#8b5cf6', weight: 6, opacity: 0.8 }]
+      },
+      createMarker: () => null, // Hide default markers
+      router: L.Routing.osrmv1({
+        serviceUrl: 'https://router.project-osrm.org/route/v1'
+      })
+    }).addTo(map);
+
+    routingControlRef.current = routingControl;
+
+    // Listen for route found
+    routingControl.on('routesfound', (e) => {
+      const routes = e.routes;
+      if (routes && routes.length > 0) {
+        const route = routes[0];
+        const distanceKm = (route.summary.totalDistance / 1000).toFixed(1);
+        const timeMinutes = Math.round(route.summary.totalTime / 60);
+        
+        if (onRouteFound) {
+          onRouteFound({ distance: distanceKm, time: timeMinutes });
+        }
+      }
+    });
+
+    // Cleanup
+    return () => {
+      if (routingControlRef.current && map) {
+        map.removeControl(routingControlRef.current);
+        routingControlRef.current = null;
+      }
+    };
+  }, [map, start, end, onRouteFound]);
+
+  return null;
+};
 
 const CATEGORY_OPTIONS = [
   { value: 'restaurant', label: 'Nhà hàng', emoji: '🍽️' },
@@ -41,6 +106,17 @@ const LocationMap = ({ onLocationSelect }) => {
   const [error, setError] = useState(null);
   const [selectedCategory, setSelectedCategory] = useState(CATEGORY_OPTIONS[0].value);
   const [locationAccuracy, setLocationAccuracy] = useState(null);
+  
+  // Review modal states
+  const [selectedPlace, setSelectedPlace] = useState(null);
+  const [placeReviews, setPlaceReviews] = useState([]);
+  const [reviewsLoading, setReviewsLoading] = useState(false);
+  const [reviewsError, setReviewsError] = useState(null);
+  const [isReviewModalOpen, setIsReviewModalOpen] = useState(false);
+
+  // Routing states
+  const [routeDestination, setRouteDestination] = useState(null);
+  const [routeInfo, setRouteInfo] = useState(null);
 
   const buildMapsUrl = useCallback((place) => {
     if (!place) {
@@ -213,6 +289,69 @@ const LocationMap = ({ onLocationSelect }) => {
     }
   };
 
+  // Fetch place reviews
+  const fetchPlaceReviews = async (placeId) => {
+    setReviewsLoading(true);
+    setReviewsError(null);
+    
+    try {
+      const response = await axios.get(`/api/location/place/${placeId}/reviews`);
+      setPlaceReviews(response.data.reviews || []);
+    } catch (err) {
+      console.error('Error fetching reviews:', err);
+      setReviewsError('Không thể tải đánh giá. Vui lòng thử lại sau.');
+    } finally {
+      setReviewsLoading(false);
+    }
+  };
+
+  // Handle review button click
+  const handleViewReviews = (event, place) => {
+    event.preventDefault();
+    event.stopPropagation();
+    
+    setSelectedPlace(place);
+    setIsReviewModalOpen(true);
+    fetchPlaceReviews(place.place_id);
+  };
+
+  // Close review modal
+  const handleCloseReviewModal = () => {
+    setIsReviewModalOpen(false);
+    setSelectedPlace(null);
+    setPlaceReviews([]);
+    setReviewsError(null);
+  };
+
+  // Handle routing - show route when clicking card
+  const handleCardClick = (event, place) => {
+    // Don't trigger if clicking on buttons
+    if (event.target.closest('button')) {
+      return;
+    }
+
+    const destination = {
+      lat: place.geometry.location.lat,
+      lng: place.geometry.location.lng,
+      placeId: place.place_id
+    };
+
+    // Toggle route: if same place clicked, clear route
+    if (routeDestination?.placeId === destination.placeId) {
+      setRouteDestination(null);
+      setRouteInfo(null);
+    } else {
+      setRouteDestination(destination);
+    }
+  };
+
+  // Handle route found callback
+  const handleRouteFound = (info) => {
+    setRouteInfo(info);
+  };
+
+  // Open place in Google Maps
+  // Open place in Google Maps
   const handleOpenInMaps = (place) => {
     const url = buildMapsUrl(place);
     window.open(url, '_blank', 'noopener,noreferrer');
@@ -370,6 +509,15 @@ const LocationMap = ({ onLocationSelect }) => {
                   subdomains={['mt0', 'mt1', 'mt2', 'mt3']}
                 />
 
+                {/* Routing Machine */}
+                {routeDestination && userLocation && (
+                  <RoutingMachine
+                    start={userLocation}
+                    end={routeDestination}
+                    onRouteFound={handleRouteFound}
+                  />
+                )}
+
                 <Marker
                   position={[userLocation.lat, userLocation.lng]}
                   icon={createUserLocationIcon()}
@@ -409,11 +557,30 @@ const LocationMap = ({ onLocationSelect }) => {
           </div>
         </div>
 
+        {/* Route Info Banner */}
+        {routeInfo && (
+          <div className="route-info-banner">
+            <span className="route-info-icon">🚗</span>
+            <div className="route-info-details">
+              <strong>Chỉ đường:</strong> {routeInfo.distance} km • {routeInfo.time} phút
+            </div>
+            <button 
+              className="route-info-close"
+              onClick={() => {
+                setRouteDestination(null);
+                setRouteInfo(null);
+              }}
+            >
+              ✕
+            </button>
+          </div>
+        )}
+
         <div className="places-card card">
           <div className="places-header">
             <div>
               <h2>Danh sách đề xuất</h2>
-              <p>Chạm để xem đường đi trên Google Maps hoặc chọn để dùng cho hành trình.</p>
+              <p>Click vào card để xem đường đi. Click nút để xem đánh giá hoặc mở Google Maps.</p>
             </div>
             <span className="places-count">{placesToDisplay.length} địa điểm</span>
           </div>
@@ -445,14 +612,17 @@ const LocationMap = ({ onLocationSelect }) => {
                 return categoryImages[category] || categoryImages.tourist_attraction;
               };
 
+              const isActiveRoute = routeDestination?.placeId === place.place_id;
+
               return (
                 <div
                   key={place.place_id || `${place.geometry.location.lat}-${place.geometry.location.lng}`}
-                  className="place-card"
-                  role="link"
+                  className={`place-card ${isActiveRoute ? 'route-active' : ''}`}
+                  role="button"
                   tabIndex={0}
-                  onClick={() => handleOpenInMaps(place)}
+                  onClick={(e) => handleCardClick(e, place)}
                   onKeyDown={(event) => handlePlaceKeyDown(event, place)}
+                  style={{ cursor: 'pointer' }}
                 >
                   {place.photos && place.photos.length > 0 ? (
                     <div className="place-image">
@@ -495,6 +665,12 @@ const LocationMap = ({ onLocationSelect }) => {
                   </div>
 
                   <div className="place-actions">
+                    <button 
+                      className="btn-view-reviews"
+                      onClick={(e) => handleViewReviews(e, place)}
+                    >
+                      💬 Xem đánh giá
+                    </button>
                     <span className="open-maps">Mở Google Maps ↗</span>
                   </div>
                 </div>
@@ -503,6 +679,16 @@ const LocationMap = ({ onLocationSelect }) => {
           </div>
         </div>
       </section>
+
+      {/* Review Modal */}
+      <ReviewModal
+        isOpen={isReviewModalOpen}
+        onClose={handleCloseReviewModal}
+        place={selectedPlace}
+        reviews={placeReviews}
+        loading={reviewsLoading}
+        error={reviewsError}
+      />
     </div>
   );
 };
