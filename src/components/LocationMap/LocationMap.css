@@ -578,13 +578,30 @@
   transform: translateY(0);
 }
 
-.open-maps {
-  font-size: 0.85rem;
-  font-weight: 600;
+.btn-open-maps {
+  padding: 8px 16px;
+  border: 2px solid #1f3c88;
+  background: white;
   color: #1f3c88;
+  border-radius: 10px;
+  font-weight: 600;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
   display: inline-flex;
   align-items: center;
   gap: 6px;
+}
+
+.btn-open-maps:hover {
+  background: #1f3c88;
+  color: white;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(31, 60, 136, 0.3);
+}
+
+.btn-open-maps:active {
+  transform: translateY(0);
 }
 
 /* Route Features */
@@ -760,7 +777,7 @@
     align-items: stretch;
   }
 
-  .open-maps {
+  .btn-open-maps {
     justify-content: center;
   }
 }

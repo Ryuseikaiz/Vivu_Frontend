@@ -17,6 +17,7 @@ import BlogDetail from './components/Blog/BlogDetail';
 import HomePage from './components/HomePage/HomePage';
 import LoadingVideos from './components/LoadingVideos/LoadingVideos';
 import Toast from './components/Toast/Toast';
+import MessengerChat from './components/MessengerChat/MessengerChat';
 
 const LoadingScreen = () => (
   <div className="App">
@@ -223,6 +224,7 @@ function App() {
     <AuthProvider>
       <Router>
         <Toast />
+        <MessengerChat />
         <AppShell />
       </Router>
     </AuthProvider>

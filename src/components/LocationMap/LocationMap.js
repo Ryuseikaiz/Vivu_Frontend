@@ -17,66 +17,8 @@ L.Icon.Default.mergeOptions({
 });
 
 // Routing Machine Component
-const RoutingMachine = ({ start, end, onRouteFound }) => {
-  const map = useMap();
-  const routingControlRef = useRef(null);
-
-  useEffect(() => {
-    if (!map || !start || !end) return;
-
-    // Remove existing routing control
-    if (routingControlRef.current) {
-      map.removeControl(routingControlRef.current);
-      routingControlRef.current = null;
-    }
-
-    // Create new routing control
-    const routingControl = L.Routing.control({
-      waypoints: [
-        L.latLng(start.lat, start.lng),
-        L.latLng(end.lat, end.lng)
-      ],
-      routeWhileDragging: false,
-      addWaypoints: false,
-      draggableWaypoints: false,
-      fitSelectedRoutes: true,
-      showAlternatives: false,
-      lineOptions: {
-        styles: [{ color: '#8b5cf6', weight: 6, opacity: 0.8 }]
-      },
-      createMarker: () => null, // Hide default markers
-      router: L.Routing.osrmv1({
-        serviceUrl: 'https://router.project-osrm.org/route/v1'
-      })
-    }).addTo(map);
-
-    routingControlRef.current = routingControl;
-
-    // Listen for route found
-    routingControl.on('routesfound', (e) => {
-      const routes = e.routes;
-      if (routes && routes.length > 0) {
-        const route = routes[0];
-        const distanceKm = (route.summary.totalDistance / 1000).toFixed(1);
-        const timeMinutes = Math.round(route.summary.totalTime / 60);
-        
-        if (onRouteFound) {
-          onRouteFound({ distance: distanceKm, time: timeMinutes });
-        }
-      }
-    });
-
-    // Cleanup
-    return () => {
-      if (routingControlRef.current && map) {
-        map.removeControl(routingControlRef.current);
-        routingControlRef.current = null;
-      }
-    };
-  }, [map, start, end, onRouteFound]);
-
-  return null;
-};
+// RoutingMachine component removed - causing too many errors with leaflet-routing-machine
+// const RoutingMachine = ({ start, end, onRouteFound }) => { ... };
 
 const CATEGORY_OPTIONS = [
   { value: 'restaurant', label: 'Nhà hàng', emoji: '🍽️' },
@@ -114,9 +56,9 @@ const LocationMap = ({ onLocationSelect }) => {
   const [reviewsError, setReviewsError] = useState(null);
   const [isReviewModalOpen, setIsReviewModalOpen] = useState(false);
 
-  // Routing states
-  const [routeDestination, setRouteDestination] = useState(null);
-  const [routeInfo, setRouteInfo] = useState(null);
+  // Routing states - REMOVED
+  // const [routeDestination, setRouteDestination] = useState(null);
+  // const [routeInfo, setRouteInfo] = useState(null);
 
   const buildMapsUrl = useCallback((place) => {
     if (!place) {
@@ -151,7 +93,7 @@ const LocationMap = ({ onLocationSelect }) => {
       const response = await axios.post('/api/location/nearby', {
         location,
         category,
-        radius: 2000
+        radius: 2000 // 2km radius for map display (not too crowded)
       });
       setNearbyPlaces(response.data.places || []);
     } catch (fetchError) {
@@ -323,31 +265,13 @@ const LocationMap = ({ onLocationSelect }) => {
     setReviewsError(null);
   };
 
-  // Handle routing - show route when clicking card
+  // Handle card click - removed routing functionality
   const handleCardClick = (event, place) => {
     // Don't trigger if clicking on buttons
     if (event.target.closest('button')) {
       return;
     }
-
-    const destination = {
-      lat: place.geometry.location.lat,
-      lng: place.geometry.location.lng,
-      placeId: place.place_id
-    };
-
-    // Toggle route: if same place clicked, clear route
-    if (routeDestination?.placeId === destination.placeId) {
-      setRouteDestination(null);
-      setRouteInfo(null);
-    } else {
-      setRouteDestination(destination);
-    }
-  };
-
-  // Handle route found callback
-  const handleRouteFound = (info) => {
-    setRouteInfo(info);
+    // Routing feature removed - cards are now just for viewing details
   };
 
   // Open place in Google Maps
@@ -509,14 +433,14 @@ const LocationMap = ({ onLocationSelect }) => {
                   subdomains={['mt0', 'mt1', 'mt2', 'mt3']}
                 />
 
-                {/* Routing Machine */}
-                {routeDestination && userLocation && (
+                {/* Routing Machine - REMOVED due to errors */}
+                {/* {routeDestination && userLocation && (
                   <RoutingMachine
                     start={userLocation}
                     end={routeDestination}
                     onRouteFound={handleRouteFound}
                   />
-                )}
+                )} */}
 
                 <Marker
                   position={[userLocation.lat, userLocation.lng]}
@@ -557,24 +481,8 @@ const LocationMap = ({ onLocationSelect }) => {
           </div>
         </div>
 
-        {/* Route Info Banner */}
-        {routeInfo && (
-          <div className="route-info-banner">
-            <span className="route-info-icon">🚗</span>
-            <div className="route-info-details">
-              <strong>Chỉ đường:</strong> {routeInfo.distance} km • {routeInfo.time} phút
-            </div>
-            <button 
-              className="route-info-close"
-              onClick={() => {
-                setRouteDestination(null);
-                setRouteInfo(null);
-              }}
-            >
-              ✕
-            </button>
-          </div>
-        )}
+        {/* Route Info Banner - REMOVED */}
+        {/* {routeInfo && (...)} */}
 
         <div className="places-card card">
           <div className="places-header">
@@ -612,12 +520,10 @@ const LocationMap = ({ onLocationSelect }) => {
                 return categoryImages[category] || categoryImages.tourist_attraction;
               };
 
-              const isActiveRoute = routeDestination?.placeId === place.place_id;
-
               return (
                 <div
                   key={place.place_id || `${place.geometry.location.lat}-${place.geometry.location.lng}`}
-                  className={`place-card ${isActiveRoute ? 'route-active' : ''}`}
+                  className="place-card"
                   role="button"
                   tabIndex={0}
                   onClick={(e) => handleCardClick(e, place)}
@@ -671,7 +577,15 @@ const LocationMap = ({ onLocationSelect }) => {
                     >
                       💬 Xem đánh giá
                     </button>
-                    <span className="open-maps">Mở Google Maps ↗</span>
+                    <button 
+                      className="btn-open-maps"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleOpenInMaps(place);
+                      }}
+                    >
+                      🗺️ Mở Google Maps ↗
+                    </button>
                   </div>
                 </div>
               );
