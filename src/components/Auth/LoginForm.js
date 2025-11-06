@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import SocialLogin from './SocialLogin';
 import './AuthForm.css';
@@ -12,6 +13,8 @@ const LoginForm = ({ onSwitchToRegister }) => {
   const [message, setMessage] = useState('');
 
   const { login } = useAuth();
+  const navigate = useNavigate();
+  const location = useLocation();
 
   const handleChange = (e) => {
     setFormData({
@@ -29,6 +32,20 @@ const LoginForm = ({ onSwitchToRegister }) => {
     
     if (result.success) {
       setMessage({ type: 'success', text: result.message });
+      
+      // Get user data from result or localStorage
+      const userData = result.user || JSON.parse(localStorage.getItem('user'));
+      
+      // Redirect based on role
+      setTimeout(() => {
+        if (userData?.role === 'admin') {
+          navigate('/admin');
+        } else {
+          // Redirect to previous page or home
+          const from = location.state?.from || '/';
+          navigate(from);
+        }
+      }, 500);
     } else {
       setMessage({ type: 'error', text: result.error });
     }

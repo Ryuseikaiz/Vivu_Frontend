@@ -14,10 +14,19 @@ const SocialLogin = ({ mode = 'login' }) => {
         
         if (result.success) {
           console.log('Login successful!');
+          
+          // Get user data and redirect based on role
+          const userData = result.user || JSON.parse(localStorage.getItem('user'));
+          
           // Wait for React state to update fully before redirect
           setTimeout(() => {
-            console.log('Redirecting to home page...');
-            window.location.href = '/';
+            if (userData?.role === 'admin') {
+              console.log('Redirecting to admin dashboard...');
+              window.location.href = '/admin';
+            } else {
+              console.log('Redirecting to home page...');
+              window.location.href = '/';
+            }
           }, 1000);
         } else {
           console.error('Login failed:', result.error);

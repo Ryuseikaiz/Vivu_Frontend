@@ -104,8 +104,9 @@ export const AuthProvider = ({ children }) => {
       setToken(newToken);
       setUser(userData);
       localStorage.setItem('token', newToken);
+      localStorage.setItem('user', JSON.stringify(userData));
       
-      return { success: true, message: response.data.message };
+      return { success: true, message: response.data.message, user: userData };
     } catch (error) {
       return { 
         success: false, 
@@ -155,7 +156,7 @@ export const AuthProvider = ({ children }) => {
       console.log('Token in localStorage:', localStorage.getItem('token')?.substring(0, 20) + '...');
       console.log('User in localStorage:', localStorage.getItem('user'));
       
-      return { success: true, message: 'Đăng nhập thành công!' };
+      return { success: true, message: 'Đăng nhập thành công!', user: userData };
     } catch (error) {
       console.error('❌ Login with Google error:', error);
       const message = error.response?.data?.message || 'Đăng nhập Google thất bại';
