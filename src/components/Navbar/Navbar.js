@@ -146,6 +146,19 @@ const Navbar = () => {
                 >
                   Quản lý gói dịch vụ
                 </button>
+                {user?.role === 'admin' && (
+                  <button
+                    type="button"
+                    className="dropdown-item admin-link"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      handleNavigate('/admin');
+                    }}
+                  >
+                    🎛️ Admin Dashboard
+                  </button>
+                )}
                 <button
                   type="button"
                   className="dropdown-item logout"

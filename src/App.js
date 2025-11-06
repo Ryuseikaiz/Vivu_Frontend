@@ -18,6 +18,7 @@ import HomePage from './components/HomePage/HomePage';
 import LoadingVideos from './components/LoadingVideos/LoadingVideos';
 import Toast from './components/Toast/Toast';
 import MessengerChat from './components/MessengerChat/MessengerChat';
+import AdminDashboard from './components/Admin/AdminDashboard';
 
 const LoadingScreen = () => (
   <div className="App">
@@ -208,6 +209,14 @@ const AppShell = () => {
           element={(
             <ProtectedRoute>
               <SubscriptionPlans />
+            </ProtectedRoute>
+          )}
+        />
+        <Route
+          path="/admin"
+          element={(
+            <ProtectedRoute>
+              <AdminDashboard />
             </ProtectedRoute>
           )}
         />
