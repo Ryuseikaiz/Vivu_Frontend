@@ -1,32 +1,24 @@
-import React, { useState } from "react";
-import {
-  BrowserRouter as Router,
-  Routes,
-  Route,
-  Navigate,
-  useNavigate,
-  useLocation,
-} from "react-router-dom";
-import { AuthProvider, useAuth } from "./contexts/AuthContext";
-import "./App.css";
-import TravelForm from "./components/TravelForm";
-import TravelResults from "./components/TravelResults";
-import EmailForm from "./components/EmailForm";
-import Sidebar from "./components/Sidebar";
-import Navbar from "./components/Navbar/Navbar";
-import LoginForm from "./components/Auth/LoginForm";
-import RegisterForm from "./components/Auth/RegisterForm";
-import SubscriptionPlans from "./components/Subscription/SubscriptionPlans";
-import LocationMap from "./components/LocationMap/LocationMap";
-import BlogList from "./components/Blog/BlogList";
-import CreateBlog from "./components/Blog/CreateBlog";
-import BlogDetail from "./components/Blog/BlogDetail";
-import HomePage from "./components/HomePage/HomePage";
-import LoadingVideos from "./components/LoadingVideos/LoadingVideos";
-import Toast from "./components/Toast/Toast";
-import MessengerChat from "./components/MessengerChat/MessengerChat";
-import AdminDashboard from "./components/Admin/AdminDashboard";
-import MyProfile from "./components/Profile/MyProfile";
+import React, { useState } from 'react';
+import { BrowserRouter as Router, Routes, Route, Navigate, useNavigate, useLocation } from 'react-router-dom';
+import { AuthProvider, useAuth } from './contexts/AuthContext';
+import './App.css';
+import TravelForm from './components/TravelForm';
+import TravelResults from './components/TravelResults';
+import EmailForm from './components/EmailForm';
+import Sidebar from './components/Sidebar';
+import Navbar from './components/Navbar/Navbar';
+import LoginForm from './components/Auth/LoginForm';
+import RegisterForm from './components/Auth/RegisterForm';
+import SubscriptionPlans from './components/Subscription/SubscriptionPlans';
+import LocationMap from './components/LocationMap/LocationMap';
+import BlogList from './components/Blog/BlogList';
+import CreateBlog from './components/Blog/CreateBlog';
+import BlogDetail from './components/Blog/BlogDetail';
+import HomePage from './components/HomePage/HomePage';
+import LoadingVideos from './components/LoadingVideos/LoadingVideos';
+import Toast from './components/Toast/Toast';
+import MessengerChat from './components/MessengerChat/MessengerChat';
+import AdminDashboard from './components/Admin/AdminDashboard';
 
 const LoadingScreen = () => (
   <div className="App">
@@ -57,10 +49,10 @@ const AuthPage = ({ mode }) => {
   const navigate = useNavigate();
   const location = useLocation();
   const { isAuthenticated } = useAuth();
-  const isLogin = mode !== "register";
+  const isLogin = mode !== 'register';
 
   if (isAuthenticated) {
-    const redirectTo = location.state?.from || "/";
+    const redirectTo = location.state?.from || '/';
     return <Navigate to={redirectTo} replace />;
   }
 
@@ -69,16 +61,14 @@ const AuthPage = ({ mode }) => {
       <div className="auth-header">
         <div className="main-title">✈️🌍 AI Travel Agent 🏨🗺️</div>
         <p className="auth-subtitle">
-          {isLogin
-            ? "Trợ lý du lịch thông minh với AI"
-            : "Tạo tài khoản để bắt đầu khám phá"}
+          {isLogin ? 'Trợ lý du lịch thông minh với AI' : 'Tạo tài khoản để bắt đầu khám phá'}
         </p>
       </div>
 
       {isLogin ? (
-        <LoginForm onSwitchToRegister={() => navigate("/auth/register")} />
+        <LoginForm onSwitchToRegister={() => navigate('/auth/register')} />
       ) : (
-        <RegisterForm onSwitchToLogin={() => navigate("/auth/login")} />
+        <RegisterForm onSwitchToLogin={() => navigate('/auth/login')} />
       )}
     </div>
   );
@@ -92,7 +82,7 @@ const AiPage = ({
   threadId,
   setThreadId,
   selectedLocation,
-  clearSelectedLocation,
+  clearSelectedLocation
 }) => {
   const { user } = useAuth();
   const navigate = useNavigate();
@@ -102,12 +92,10 @@ const AiPage = ({
     <div className="ai-page">
       {needsSubscription && (
         <div className="subscription-warning">
-          <p>
-            ⚠️ Bạn cần đăng ký gói subscription để tiếp tục sử dụng dịch vụ.
-          </p>
+          <p>⚠️ Bạn cần đăng ký gói subscription để tiếp tục sử dụng dịch vụ.</p>
           <button
             className="subscribe-now-button"
-            onClick={() => navigate("/subscription")}
+            onClick={() => navigate('/subscription')}
           >
             Đăng ký ngay
           </button>
@@ -149,7 +137,7 @@ const LocationPage = ({ onSelect }) => {
     <LocationMap
       onLocationSelect={(place) => {
         onSelect(place);
-        navigate("/ai");
+        navigate('/ai');
       }}
     />
   );
@@ -160,7 +148,7 @@ const CreateBlogPage = () => {
 
   return (
     <CreateBlog
-      onBlogCreated={() => navigate("/")}
+      onBlogCreated={() => navigate('/')}
       onCancel={() => navigate(-1)}
     />
   );
@@ -185,15 +173,15 @@ const AppShell = () => {
         <Route path="/blog/:postId" element={<BlogDetail />} />
         <Route
           path="/blog/create"
-          element={
+          element={(
             <ProtectedRoute>
               <CreateBlogPage />
             </ProtectedRoute>
-          }
+          )}
         />
         <Route
           path="/ai"
-          element={
+          element={(
             <ProtectedRoute>
               <AiPage
                 travelInfo={travelInfo}
@@ -206,39 +194,31 @@ const AppShell = () => {
                 clearSelectedLocation={() => setSelectedLocation(null)}
               />
             </ProtectedRoute>
-          }
+          )}
         />
         <Route
           path="/location"
-          element={
+          element={(
             <ProtectedRoute>
               <LocationPage onSelect={(place) => setSelectedLocation(place)} />
             </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/profile"
-          element={
-            <ProtectedRoute>
-              <MyProfile />
-            </ProtectedRoute>
-          }
+          )}
         />
         <Route
           path="/subscription"
-          element={
+          element={(
             <ProtectedRoute>
               <SubscriptionPlans />
             </ProtectedRoute>
-          }
+          )}
         />
         <Route
           path="/admin"
-          element={
+          element={(
             <ProtectedRoute>
               <AdminDashboard />
             </ProtectedRoute>
-          }
+          )}
         />
         <Route path="/auth/login" element={<AuthPage mode="login" />} />
         <Route path="/auth/register" element={<AuthPage mode="register" />} />
