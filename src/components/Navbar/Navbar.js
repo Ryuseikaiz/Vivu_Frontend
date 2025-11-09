@@ -1,17 +1,12 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { NavLink, useNavigate } from 'react-router-dom';
-import { useAuth } from '../../contexts/AuthContext';
-import { showToast } from '../Toast/Toast';
-import './Navbar.css';
+import React, { useState, useEffect, useRef } from "react";
+import { NavLink, useNavigate } from "react-router-dom";
+import { useAuth } from "../../contexts/AuthContext";
+import { showToast } from "../Toast/Toast";
+import "./Navbar.css";
 
 const Navbar = () => {
-  const {
-    user,
-    logout,
-    isAuthenticated,
-    canUseTrial,
-    isSubscriptionActive
-  } = useAuth();
+  const { user, logout, isAuthenticated, canUseTrial, isSubscriptionActive } =
+    useAuth();
   const navigate = useNavigate();
   const [isMobileOpen, setIsMobileOpen] = useState(false);
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
@@ -26,26 +21,26 @@ const Navbar = () => {
     };
 
     if (isUserMenuOpen) {
-      document.addEventListener('mousedown', handleClickOutside);
+      document.addEventListener("mousedown", handleClickOutside);
     }
 
     return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
+      document.removeEventListener("mousedown", handleClickOutside);
     };
   }, [isUserMenuOpen]);
 
   const navItems = [
-    { key: 'home', label: 'Trang chủ', to: '/', requireAuth: false, end: true },
-    { key: 'ai', label: 'AI Du lịch', to: '/ai', requireAuth: true },
-    { key: 'location', label: 'Khám phá', to: '/location', requireAuth: true }
+    { key: "home", label: "Trang chủ", to: "/", requireAuth: false, end: true },
+    { key: "ai", label: "AI Du lịch", to: "/ai", requireAuth: true },
+    { key: "location", label: "Khám phá", to: "/location", requireAuth: true },
   ];
 
   const handleNavClick = (e, item) => {
     if (item.requireAuth && !isAuthenticated) {
       e.preventDefault();
-      showToast('Vui lòng đăng nhập để sử dụng tính năng này', 'info');
+      showToast("Vui lòng đăng nhập để sử dụng tính năng này", "info");
       setTimeout(() => {
-        navigate('/auth/login');
+        navigate("/auth/login");
       }, 1000);
       return;
     }
@@ -64,7 +59,7 @@ const Navbar = () => {
     logout();
     setIsMobileOpen(false);
     setIsUserMenuOpen(false);
-    navigate('/auth/login');
+    navigate("/auth/login");
   };
 
   const initials = user?.name
@@ -72,19 +67,19 @@ const Navbar = () => {
         .trim()
         .split(/\s+/)
         .map((part) => part[0])
-        .join('')
+        .join("")
         .slice(0, 2)
         .toUpperCase()
-    : 'VI';
+    : "VI";
 
   const subscriptionLabel = () => {
     if (isSubscriptionActive) {
-      return 'Gói Premium';
+      return "Gói Premium";
     }
     if (canUseTrial) {
-      return 'Đang dùng thử';
+      return "Đang dùng thử";
     }
-    return 'Chưa đăng ký';
+    return "Chưa đăng ký";
   };
 
   return (
@@ -93,19 +88,21 @@ const Navbar = () => {
         <button
           type="button"
           className="navbar-logo"
-          onClick={() => handleNavigate('/')}
+          onClick={() => handleNavigate("/")}
         >
           <span className="logo-dot" />
           Vivu
         </button>
 
-        <nav className={`navbar-links ${isMobileOpen ? 'open' : ''}`}>
+        <nav className={`navbar-links ${isMobileOpen ? "open" : ""}`}>
           {navItems.map((item) => (
             <NavLink
               key={item.key}
               to={item.to}
               end={item.end}
-              className={({ isActive }) => `nav-link ${isActive ? 'active' : ''}`}
+              className={({ isActive }) =>
+                `nav-link ${isActive ? "active" : ""}`
+              }
               onClick={(e) => handleNavClick(e, item)}
             >
               {item.label}
@@ -115,7 +112,10 @@ const Navbar = () => {
 
         <div className="navbar-actions">
           {isAuthenticated ? (
-            <div ref={userMenuRef} className={`user-menu ${isUserMenuOpen ? 'open' : ''}`}>
+            <div
+              ref={userMenuRef}
+              className={`user-menu ${isUserMenuOpen ? "open" : ""}`}
+            >
               <button
                 type="button"
                 className="user-trigger"
@@ -125,13 +125,21 @@ const Navbar = () => {
                   setIsUserMenuOpen((prev) => !prev);
                 }}
               >
-                <span className="user-avatar">{initials}</span>
+                {user?.avatar ? (
+                  <img
+                    src={user.avatar}
+                    alt={user.name}
+                    className="user-avatar"
+                  />
+                ) : (
+                  <span className="user-avatar">{initials}</span>
+                )}
                 <span className="user-details">
                   <span className="user-name">{user?.name}</span>
                   <span className="user-status">{subscriptionLabel()}</span>
                 </span>
                 <span className="chevron" aria-hidden="true">
-                  {isUserMenuOpen ? '▴' : '▾'}
+                  {isUserMenuOpen ? "▴" : "▾"}
                 </span>
               </button>
               <div className="user-dropdown">
@@ -141,19 +149,30 @@ const Navbar = () => {
                   onClick={(e) => {
                     e.preventDefault();
                     e.stopPropagation();
-                    handleNavigate('/subscription');
+                    handleNavigate("/profile");
+                  }}
+                >
+                  Thông tin của tôi
+                </button>
+                <button
+                  type="button"
+                  className="dropdown-item"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    handleNavigate("/subscription");
                   }}
                 >
                   Quản lý gói dịch vụ
                 </button>
-                {user?.role === 'admin' && (
+                {user?.role === "admin" && (
                   <button
                     type="button"
                     className="dropdown-item admin-link"
                     onClick={(e) => {
                       e.preventDefault();
                       e.stopPropagation();
-                      handleNavigate('/admin');
+                      handleNavigate("/admin");
                     }}
                   >
                     🎛️ Admin Dashboard
@@ -177,7 +196,7 @@ const Navbar = () => {
               <button
                 type="button"
                 className="nav-link cta"
-                onClick={() => handleNavigate('/auth/login')}
+                onClick={() => handleNavigate("/auth/login")}
               >
                 Đăng nhập
               </button>
@@ -186,7 +205,7 @@ const Navbar = () => {
 
           <button
             type="button"
-            className={`menu-toggle ${isMobileOpen ? 'open' : ''}`}
+            className={`menu-toggle ${isMobileOpen ? "open" : ""}`}
             onClick={() => setIsMobileOpen((prev) => !prev)}
             aria-label="Toggle navigation menu"
           >
